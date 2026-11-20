@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: bookclub-app
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Database__AutoMigrate
+        value: "true"
+      - key: DATABASE_URL
+        sync: false

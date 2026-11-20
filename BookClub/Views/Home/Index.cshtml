@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Organize seu Clube do Livro";
+}
+
+<section class="bc-hero shadow-sm mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+            <span class="badge bg-light text-dark fw-semibold px-3 py-2 rounded-pill mb-3">
+                <i class="bi bi-stars me-1" aria-hidden="true"></i> Gratuito, simples e acessível
+            </span>
+            <h1 class="display-6 fw-bold mb-3">
+                Chega de perder o cronograma de leitura no meio das mensagens.
+            </h1>
+            <p class="lead mb-4 text-white text-opacity-90">
+                O <strong>BookClub</strong> centraliza tudo que seu clube do livro precisa: qual obra o grupo está lendo agora, quais serão os próximos livros e o histórico de tudo que já foi lido.
+            </p>
+            <div class="d-flex flex-column flex-sm-row gap-3">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-light text-dark btn-lg px-4 fw-bold">
+                    <i class="bi bi-person-plus" aria-hidden="true"></i> Criar conta gratuita
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Já tenho conta
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 d-none d-lg-flex justify-content-center">
+            <div class="bg-white bg-opacity-10 rounded-4 p-4 text-center border border-white border-opacity-25 w-100">
+                <i class="bi bi-book-half display-2 mb-2" aria-hidden="true"></i>
+                <p class="fw-semibold mb-1">Leitura Atual</p>
+                <p class="small text-white text-opacity-75 mb-3">Capa, sinopse e data do próximo encontro</p>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <span class="bc-badge bc-badge-current"><i class="bi bi-book" aria-hidden="true"></i> Lendo Agora</span>
+                    <span class="bc-badge bc-badge-upcoming"><i class="bi bi-calendar-event" aria-hidden="true"></i> Próximo</span>
+                    <span class="bc-badge bc-badge-finished"><i class="bi bi-check-circle" aria-hidden="true"></i> Concluído</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section aria-labelledby="como-funciona-titulo" class="py-2">
+    <h2 id="como-funciona-titulo" class="h4 fw-bold mb-3">Como funciona em 3 passos simples</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <article class="bc-card p-4 h-100">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary mb-3" style="width: 48px; height: 48px;">
+                    <i class="bi bi-person-check fs-4" aria-hidden="true"></i>
+                </div>
+                <h3 class="h5 fw-bold">1. Crie sua conta</h3>
+                <p class="text-muted-accessible mb-0">
+                    Cadastro rápido com nome, e-mail e senha. Funciona perfeitamente no celular, tablet ou computador.
+                </p>
+            </article>
+        </div>
+
+        <div class="col-md-4">
+            <article class="bc-card p-4 h-100">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success bg-opacity-10 text-success mb-3" style="width: 48px; height: 48px;">
+                    <i class="bi bi-people fs-4" aria-hidden="true"></i>
+                </div>
+                <h3 class="h5 fw-bold">2. Crie ou entre em um clube</h3>
+                <p class="text-muted-accessible mb-0">
+                    Explore clubes públicos para solicitar participação ou entre em grupos fechados usando um código de convite curto.
+                </p>
+            </article>
+        </div>
+
+        <div class="col-md-4">
+            <article class="bc-card p-4 h-100">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning bg-opacity-25 text-dark mb-3" style="width: 48px; height: 48px;">
+                    <i class="bi bi-calendar2-check fs-4" aria-hidden="true"></i>
+                </div>
+                <h3 class="h5 fw-bold">3. Acompanhe o cronograma</h3>
+                <p class="text-muted-accessible mb-0">
+                    Veja a leitura atual em destaque, a fila dos próximos livros e todo o histórico de obras concluídas pelo grupo.
+                </p>
+            </article>
+        </div>
+    </div>
+</section>

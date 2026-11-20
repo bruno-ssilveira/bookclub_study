@@ -1,0 +1,84 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Meu Perfil";
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="bc-card p-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="member-avatar fs-5" style="width: 56px; height: 56px;">
+                    @Model.FullName.FirstOrDefault()
+                </div>
+                <div>
+                    <h1 class="h4 fw-bold mb-0">@Model.FullName</h1>
+                    <p class="text-muted-accessible small mb-0">@Model.Email</p>
+                </div>
+            </div>
+            <hr />
+            <p class="small text-muted-accessible mb-3">
+                <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+                Membro desde @Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
+            </p>
+            <div class="d-grid gap-2">
+                <a asp-controller="Club" asp-action="Index" class="btn btn-bc-primary">
+                    <i class="bi bi-collection" aria-hidden="true"></i> Ir para Meus Clubes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="bc-card p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h5 fw-bold mb-0">Clubes dos quais participo (@Model.Clubs.Count)</h2>
+                <a asp-controller="Club" asp-action="Create" class="btn btn-sm btn-bc-outline">
+                    <i class="bi bi-plus-circle" aria-hidden="true"></i> Novo Clube
+                </a>
+            </div>
+
+            @if (!Model.Clubs.Any())
+            {
+                <p class="text-muted-accessible mb-0">
+                    Você ainda não participa de nenhum clube. Explore clubes públicos ou crie o seu!
+                </p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var club in Model.Clubs)
+                    {
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@club.Id"
+                           class="list-group-item list-group-item-action px-0 py-3 d-flex justify-content-between align-items-center gap-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <span class="fw-bold text-dark">@club.Name</span>
+                                    @if (club.UserRole == ClubRole.Owner)
+                                    {
+                                        <span class="bc-badge bc-badge-owner">
+                                            <i class="bi bi-shield-check" aria-hidden="true"></i> Administrador
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="bc-badge bc-badge-member">
+                                            <i class="bi bi-person" aria-hidden="true"></i> Membro
+                                        </span>
+                                    }
+                                </div>
+                                <div class="small text-muted-accessible">
+                                    @club.MemberCount @(club.MemberCount == 1 ? "membro" : "membros")
+                                    @if (!string.IsNullOrWhiteSpace(club.CurrentBookTitle))
+                                    {
+                                        <span> • Lendo agora: <strong>@club.CurrentBookTitle</strong></span>
+                                    }
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted-accessible" aria-hidden="true"></i>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

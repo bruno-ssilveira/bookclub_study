@@ -1,0 +1,137 @@
+﻿@using System.Security.Claims
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name ?? "Usuário";
+    var pageTitle = ViewData["Title"]?.ToString();
+    var fullTitle = string.IsNullOrWhiteSpace(pageTitle) ? "BookClub" : $"{pageTitle} — BookClub";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1d3557" />
+    <meta name="description" content="BookClub — Crie e organize clubes do livro, cronograma de leituras e encontros em um só lugar." />
+    <title>@fullTitle</title>
+    <link rel="manifest" href="~/manifest.json" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bc-navbar shadow-sm" aria-label="Navegação principal">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="@(isAuthenticated ? "Club" : "Home")" asp-action="Index">
+                    <i class="bi bi-book-half fs-4" aria-hidden="true"></i>
+                    <span>BookClub</span>
+                </a>
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Abrir menu de navegação">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    @if (isAuthenticated)
+                    {
+                        <ul class="navbar-nav me-auto my-2 my-lg-0 gap-1">
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Club" && currentAction == "Index" ? "active" : "")"
+                                   asp-controller="Club" asp-action="Index">
+                                    <i class="bi bi-collection me-1" aria-hidden="true"></i> Meus Clubes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Club" && currentAction == "Explore" ? "active" : "")"
+                                   asp-controller="Club" asp-action="Explore">
+                                    <i class="bi bi-compass me-1" aria-hidden="true"></i> Explorar Clubes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Club" && currentAction == "Create" ? "active" : "")"
+                                   asp-controller="Club" asp-action="Create">
+                                    <i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Criar Clube
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 pt-2 pt-lg-0 border-top border-light border-opacity-10 border-lg-0">
+                            <a class="nav-link @(currentController == "Account" && currentAction == "Profile" ? "active" : "")"
+                               asp-controller="Account" asp-action="Profile" title="Ver meu perfil">
+                                <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
+                                <span>Olá, @userName</span>
+                            </a>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                                    <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ms-auto d-flex flex-column flex-lg-row gap-2 pt-2 pt-lg-0">
+                            <a class="btn btn-outline-light btn-sm" asp-controller="Account" asp-action="Login">
+                                <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Entrar
+                            </a>
+                            <a class="btn btn-light btn-sm text-dark fw-bold" asp-controller="Account" asp-action="Register">
+                                <i class="bi bi-person-plus" aria-hidden="true"></i> Criar conta
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="conteudo-principal" class="container py-4 flex-grow-1" tabindex="-1">
+        @if (TempData["SuccessMessage"] is string successMsg)
+        {
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 rounded-3 shadow-sm" role="status" aria-live="polite">
+                <i class="bi bi-check-circle-fill fs-5 flex-shrink-0" aria-hidden="true"></i>
+                <div>@successMsg</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar aviso"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] is string errorMsg)
+        {
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 rounded-3 shadow-sm" role="alert" aria-live="assertive">
+                <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0" aria-hidden="true"></i>
+                <div>@errorMsg</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar alerta"></button>
+            </div>
+        }
+
+        @if (TempData["InfoMessage"] is string infoMsg)
+        {
+            <div class="alert alert-info alert-dismissible fade show d-flex align-items-center gap-2 rounded-3 shadow-sm" role="status" aria-live="polite">
+                <i class="bi bi-info-circle-fill fs-5 flex-shrink-0" aria-hidden="true"></i>
+                <div>@infoMsg</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar informação"></button>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="bc-footer py-3 mt-4">
+        <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small">
+            <div>
+                <i class="bi bi-book-half me-1" aria-hidden="true"></i>
+                <strong>BookClub</strong> — Organização simples e acessível para clubes do livro.
+            </div>
+            <div>Projeto Extensionista • @DateTime.Now.Year</div>
+        </div>
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

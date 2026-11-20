@@ -1,0 +1,279 @@
+@model AddClubBookViewModel
+@{
+    ViewData["Title"] = $"Adicionar Livro — {Model.ClubName}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        <div class="mb-3">
+            <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="text-decoration-none fw-semibold">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Voltar para @Model.ClubName
+            </a>
+        </div>
+
+        <h1 class="h3 fw-bold mb-1">Adicionar Livro ao Clube</h1>
+        <p class="text-muted-accessible mb-4">
+            Busque um livro automaticamente pelo título, autor ou ISBN — ou preencha os campos manualmente abaixo.
+        </p>
+
+        <section class="bc-card p-4 mb-4" aria-labelledby="busca-api-titulo">
+            <h2 id="busca-api-titulo" class="h5 fw-bold mb-2">
+                <i class="bi bi-search me-1 text-primary" aria-hidden="true"></i> 1. Buscar livro automaticamente
+            </h2>
+            <p class="small text-muted-accessible mb-3">
+                Pesquise na Google Books API e clique em <strong>Selecionar</strong> para preencher o formulário automaticamente.
+            </p>
+
+            <div class="row g-2 align-items-end">
+                <div class="col-md-9">
+                    <label for="apiSearchInput" class="form-label mb-1">Título, autor ou ISBN</label>
+                    <input type="search"
+                           id="apiSearchInput"
+                           class="form-control"
+                           placeholder="Ex.: Dom Casmurro, Machado de Assis ou 9788535914849" />
+                </div>
+                <div class="col-md-3">
+                    <button type="button" id="apiSearchBtn" class="btn btn-bc-primary w-100">
+                        <i class="bi bi-search" aria-hidden="true"></i> Buscar
+                    </button>
+                </div>
+            </div>
+
+            <div id="apiSearchStatus" class="mt-3" aria-live="polite"></div>
+            <div id="apiSearchResults" class="row g-2 mt-2"></div>
+        </section>
+
+        <section class="bc-card p-4" aria-labelledby="form-livro-titulo" id="bookFormSection">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h2 id="form-livro-titulo" class="h5 fw-bold mb-0">
+                        <i class="bi bi-journal-text me-1 text-primary" aria-hidden="true"></i> 2. Dados do livro e cronograma
+                    </h2>
+                    <p class="small text-muted-accessible mb-0">
+                        Você pode revisar os dados preenchidos ou cadastrar manualmente caso o livro não apareça na busca.
+                    </p>
+                </div>
+                <button type="button" id="clearBookFormBtn" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-eraser" aria-hidden="true"></i> Limpar campos
+                </button>
+            </div>
+
+            <form asp-action="Add" method="post" novalidate>
+                <input type="hidden" asp-for="ClubId" />
+                <input type="hidden" asp-for="ExternalId" id="fieldExternalId" />
+                <input type="hidden" asp-for="CoverUrl" id="fieldCoverUrl" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
+
+                <div id="selectedCoverPreview" class="d-none align-items-center gap-3 p-3 mb-3 rounded-3 bg-light border">
+                    <img id="previewCoverImg"
+                         src="/img/default-cover.png"
+                         alt="Prévia da capa do livro selecionado"
+                         class="book-cover-sm" />
+                    <div class="small">
+                        <div class="fw-bold text-success">
+                            <i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i> Livro preenchido pela busca
+                        </div>
+                        <div class="text-muted-accessible">Confira o status e as datas abaixo antes de salvar.</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-7">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" id="fieldName" class="form-control" placeholder="Ex.: Capitães da Areia" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Author" class="form-label"></label>
+                        <input asp-for="Author" id="fieldAuthor" class="form-control" placeholder="Ex.: Jorge Amado" />
+                        <span asp-validation-for="Author" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-4">
+                        <label asp-for="Pages" class="form-label"></label>
+                        <input asp-for="Pages" id="fieldPages" class="form-control" type="number" min="1" placeholder="Ex.: 280" />
+                        <span asp-validation-for="Pages" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-4">
+                        <label asp-for="PublishedYear" class="form-label"></label>
+                        <input asp-for="PublishedYear" id="fieldPublishedYear" class="form-control" type="number" min="1000" max="2100" placeholder="Ex.: 1937" />
+                        <span asp-validation-for="PublishedYear" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-4">
+                        <label asp-for="Isbn" class="form-label"></label>
+                        <input asp-for="Isbn" id="fieldIsbn" class="form-control" placeholder="Opcional" />
+                        <span asp-validation-for="Isbn" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Synopsis" class="form-label"></label>
+                    <textarea asp-for="Synopsis" id="fieldSynopsis" class="form-control" rows="3"
+                              placeholder="Breve resumo da obra (opcional)..."></textarea>
+                    <span asp-validation-for="Synopsis" class="text-danger small"></span>
+                </div>
+
+                <hr class="my-4" />
+
+                <h3 class="h6 fw-bold mb-3">Cronograma no Clube</h3>
+                <div class="row g-3 mb-4 align-items-end">
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ClubBookStatus>()"></select>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DisplayOrder" class="form-label"></label>
+                        <input asp-for="DisplayOrder" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="DisplayOrder" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="StartDate" class="form-label"></label>
+                        <input asp-for="StartDate" class="form-control" type="date" />
+                        <span asp-validation-for="StartDate" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="TargetFinishDate" class="form-label"></label>
+                        <input asp-for="TargetFinishDate" class="form-control" type="date" />
+                        <span asp-validation-for="TargetFinishDate" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button type="submit" class="btn btn-bc-primary btn-lg flex-grow-1">
+                        <i class="bi bi-check2-circle" aria-hidden="true"></i> Salvar Livro no Clube
+                    </button>
+                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="btn btn-outline-secondary btn-lg">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const searchInput = document.getElementById('apiSearchInput');
+            const searchBtn = document.getElementById('apiSearchBtn');
+            const statusBox = document.getElementById('apiSearchStatus');
+            const resultsBox = document.getElementById('apiSearchResults');
+            const previewBox = document.getElementById('selectedCoverPreview');
+            const previewImg = document.getElementById('previewCoverImg');
+            const clearBtn = document.getElementById('clearBookFormBtn');
+
+            const fields = {
+                externalId: document.getElementById('fieldExternalId'),
+                coverUrl: document.getElementById('fieldCoverUrl'),
+                name: document.getElementById('fieldName'),
+                author: document.getElementById('fieldAuthor'),
+                pages: document.getElementById('fieldPages'),
+                publishedYear: document.getElementById('fieldPublishedYear'),
+                isbn: document.getElementById('fieldIsbn'),
+                synopsis: document.getElementById('fieldSynopsis')
+            };
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text || '';
+                return div.innerHTML;
+            }
+
+            async function executeSearch() {
+                const q = (searchInput.value || '').trim();
+                resultsBox.innerHTML = '';
+
+                if (q.length < 2) {
+                    statusBox.innerHTML = '<div class="alert alert-warning py-2 mb-0 small">Digite pelo menos 2 caracteres para buscar.</div>';
+                    return;
+                }
+
+                searchBtn.disabled = true;
+                statusBox.innerHTML = '<div class="d-flex align-items-center gap-2 text-muted-accessible small"><div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div> Buscando livros...</div>';
+
+                try {
+                    const url = '@Url.Action("SearchApi", "ClubBook")' + '?query=' + encodeURIComponent(q);
+                    const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) throw new Error('Erro na busca');
+
+                    const data = await response.json();
+                    const items = data.results || [];
+
+                    if (data.warning) {
+                        statusBox.innerHTML = `<div class="alert alert-warning py-2 mb-0 small"><i class="bi bi-info-circle me-1"></i>${escapeHtml(data.warning)}</div>`;
+                    } else {
+                        statusBox.innerHTML = `<div class="small text-success fw-semibold">${items.length} resultado(s) encontrado(s). Clique em "Selecionar" no livro desejado.</div>`;
+                    }
+
+                    items.forEach((book, idx) => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6';
+
+                        const cover = book.coverUrl || '/img/default-cover.png';
+                        const metaParts = [];
+                        if (book.publishedYear) metaParts.push(book.publishedYear);
+                        if (book.pages) metaParts.push(`${book.pages} págs.`);
+                        if (book.isbn) metaParts.push(`ISBN ${book.isbn}`);
+
+                        col.innerHTML = `
+                            <div class="book-search-result p-3 h-100 d-flex gap-3 align-items-start">
+                                <img src="${escapeHtml(cover)}" alt="Capa de ${escapeHtml(book.title)}" class="book-cover-sm" onerror="this.onerror=null;this.src='/img/default-cover.png';" />
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-bold text-dark">${escapeHtml(book.title)}</div>
+                                    <div class="small text-muted-accessible mb-1">${escapeHtml(book.author)}</div>
+                                    ${metaParts.length ? `<div class="small text-muted-accessible mb-2">${escapeHtml(metaParts.join(' • '))}</div>` : ''}
+                                    <button type="button" class="btn btn-sm btn-bc-outline select-book-btn" data-index="${idx}">
+                                        <i class="bi bi-check2" aria-hidden="true"></i> Selecionar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                        col.querySelector('.select-book-btn').addEventListener('click', () => {
+                            fields.externalId.value = book.externalId || '';
+                            fields.coverUrl.value = book.coverUrl || '';
+                            fields.name.value = book.title || '';
+                            fields.author.value = book.author || '';
+                            fields.pages.value = book.pages || '';
+                            fields.publishedYear.value = book.publishedYear || '';
+                            fields.isbn.value = book.isbn || '';
+                            fields.synopsis.value = book.synopsis || '';
+
+                            previewImg.src = book.coverUrl || '/img/default-cover.png';
+                            previewBox.classList.remove('d-none');
+                            previewBox.classList.add('d-flex');
+
+                            document.getElementById('bookFormSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            fields.name.focus();
+                        });
+
+                        resultsBox.appendChild(col);
+                    });
+                } catch {
+                    statusBox.innerHTML = '<div class="alert alert-warning py-2 mb-0 small">Não foi possível consultar a busca automática agora. Preencha os dados manualmente abaixo.</div>';
+                } finally {
+                    searchBtn.disabled = false;
+                }
+            }
+
+            searchBtn.addEventListener('click', executeSearch);
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    executeSearch();
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                Object.values(fields).forEach(el => { if (el) el.value = ''; });
+                previewBox.classList.add('d-none');
+                previewBox.classList.remove('d-flex');
+            });
+        })();
+    </script>
+}

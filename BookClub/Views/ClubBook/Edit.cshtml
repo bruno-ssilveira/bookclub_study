@@ -1,0 +1,70 @@
+@model EditClubBookViewModel
+@{
+    ViewData["Title"] = $"Editar Leitura — {Model.BookTitle}";
+    var coverSrc = string.IsNullOrWhiteSpace(Model.BookCoverUrl)
+        ? Url.Content("~/img/default-cover.png")
+        : Model.BookCoverUrl;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="mb-3">
+            <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="text-decoration-none fw-semibold">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Voltar para @Model.ClubName
+            </a>
+        </div>
+
+        <div class="bc-card p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 pb-3 mb-4 border-bottom">
+                <img src="@coverSrc"
+                     alt="Capa do livro @Model.BookTitle"
+                     class="book-cover-sm"
+                     onerror="this.onerror=null;this.src='/img/default-cover.png';" />
+                <div>
+                    <h1 class="h4 fw-bold mb-1">@Model.BookTitle</h1>
+                    <p class="text-muted-accessible mb-0">por @Model.BookAuthor</p>
+                </div>
+            </div>
+
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
+
+                <div class="row g-3 mb-4 align-items-end">
+                    <div class="col-sm-6">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ClubBookStatus>()"></select>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="DisplayOrder" class="form-label"></label>
+                        <input asp-for="DisplayOrder" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="DisplayOrder" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="StartDate" class="form-label"></label>
+                        <input asp-for="StartDate" class="form-control" type="date" />
+                        <span asp-validation-for="StartDate" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="TargetFinishDate" class="form-label"></label>
+                        <input asp-for="TargetFinishDate" class="form-control" type="date" />
+                        <span asp-validation-for="TargetFinishDate" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button type="submit" class="btn btn-bc-primary btn-lg flex-grow-1">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Salvar Alterações
+                    </button>
+                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="btn btn-outline-secondary btn-lg">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

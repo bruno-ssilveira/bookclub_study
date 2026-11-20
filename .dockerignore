@@ -1,0 +1,11 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/*.user
+**/*.suo
+**/.DS_Store
+README.md
+contexto_do_projeto_bookclub_mvp_simplificado_para_ia.md

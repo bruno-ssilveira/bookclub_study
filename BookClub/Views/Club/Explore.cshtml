@@ -1,0 +1,156 @@
+@model ExploreClubsViewModel
+@{
+    ViewData["Title"] = "Explorar Clubes Públicos";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Explorar Clubes Públicos</h1>
+        <p class="text-muted-accessible mb-0">Encontre grupos abertos de leitura e envie uma solicitação para participar.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-bc-primary">
+        <i class="bi bi-plus-circle" aria-hidden="true"></i> Criar Novo Clube
+    </a>
+</div>
+
+<section aria-label="Buscar clubes públicos" class="bc-card p-3 p-md-4 mb-4">
+    <form asp-action="Explore" method="get" class="row g-2 align-items-end">
+        <div class="col-md-9">
+            <label for="searchClubsInput" class="form-label mb-1">Buscar por nome ou temática</label>
+            <input type="search"
+                   id="searchClubsInput"
+                   name="search"
+                   value="@Model.Search"
+                   class="form-control"
+                   placeholder="Ex.: Ficção Científica, Clássicos Brasileiros..." />
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-bc-primary flex-grow-1">
+                <i class="bi bi-search" aria-hidden="true"></i> Buscar
+            </button>
+            @if (!string.IsNullOrWhiteSpace(Model.Search))
+            {
+                <a asp-action="Explore" class="btn btn-outline-secondary" title="Limpar busca">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    <span class="visually-hidden">Limpar busca</span>
+                </a>
+            }
+        </div>
+    </form>
+</section>
+
+@if (!Model.PublicClubs.Any())
+{
+    <div class="bc-card p-4 p-md-5 text-center">
+        <i class="bi bi-search display-5 text-muted-accessible mb-3" aria-hidden="true"></i>
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+            <h2 class="h5 fw-bold mb-2">Nenhum clube encontrado para "@Model.Search"</h2>
+            <p class="text-muted-accessible mb-3">Tente outro termo de busca ou crie um novo clube com esse tema.</p>
+            <a asp-action="Explore" class="btn btn-bc-outline me-2">Ver todos os públicos</a>
+        }
+        else
+        {
+            <h2 class="h5 fw-bold mb-2">Ainda não há clubes públicos cadastrados</h2>
+            <p class="text-muted-accessible mb-3">Que tal ser a primeira pessoa a criar um clube aberto?</p>
+        }
+        <a asp-action="Create" class="btn btn-bc-primary">
+            <i class="bi bi-plus-circle" aria-hidden="true"></i> Criar Clube
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var club in Model.PublicClubs)
+        {
+            <div class="col-md-6 col-lg-4">
+                <article class="bc-card p-4 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="bc-badge bc-badge-public">
+                            <i class="bi bi-globe2" aria-hidden="true"></i> Público
+                        </span>
+                        <span class="small text-muted-accessible">
+                            <i class="bi bi-people me-1" aria-hidden="true"></i>
+                            @club.MemberCount @(club.MemberCount == 1 ? "membro" : "membros")
+                        </span>
+                    </div>
+
+                    <h2 class="h5 fw-bold mb-2">
+                        @if (club.IsBanned)
+                        {
+                            <span class="text-dark">@club.Name</span>
+                        }
+                        else
+                        {
+                            <a asp-action="Details" asp-route-id="@club.Id" class="text-decoration-none text-dark">
+                                @club.Name
+                            </a>
+                        }
+                    </h2>
+
+                    @if (!string.IsNullOrWhiteSpace(club.Description))
+                    {
+                        <p class="text-muted-accessible small mb-3">
+                            @(club.Description.Length > 140 ? club.Description[..140] + "..." : club.Description)
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-muted-accessible small fst-italic mb-3">Sem descrição informada.</p>
+                    }
+
+                    <div class="mt-auto pt-3 border-top">
+                        @if (!string.IsNullOrWhiteSpace(club.CurrentBookTitle))
+                        {
+                            <p class="small mb-3">
+                                <span class="text-success fw-semibold"><i class="bi bi-book me-1" aria-hidden="true"></i>Lendo agora:</span>
+                                @club.CurrentBookTitle
+                            </p>
+                        }
+
+                        @if (club.IsMember)
+                        {
+                            <a asp-action="Details" asp-route-id="@club.Id" class="btn btn-bc-outline w-100">
+                                <i class="bi bi-check2-circle" aria-hidden="true"></i> Já participo • Abrir
+                            </a>
+                        }
+                        else if (club.IsPending)
+                        {
+                            <div class="d-flex flex-column gap-2">
+                                <span class="bc-badge bc-badge-owner justify-content-center py-2">
+                                    <i class="bi bi-hourglass-split" aria-hidden="true"></i> Solicitação pendente
+                                </span>
+                                <form asp-action="CancelRequest" asp-route-id="@club.Id" method="post">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                                        <i class="bi bi-x-circle" aria-hidden="true"></i> Cancelar pedido
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else if (club.IsBanned)
+                        {
+                            <span class="bc-badge bc-badge-private justify-content-center py-2 w-100">
+                                <i class="bi bi-slash-circle" aria-hidden="true"></i> Acesso bloqueado
+                            </span>
+                        }
+                        else
+                        {
+                            <div class="d-flex gap-2">
+                                <form asp-action="Join" asp-route-id="@club.Id" method="post" class="flex-grow-1">
+                                    <button type="submit" class="btn btn-bc-primary w-100">
+                                        <i class="bi bi-person-plus" aria-hidden="true"></i> Solicitar Entrada
+                                    </button>
+                                </form>
+                                <a asp-action="Details" asp-route-id="@club.Id" class="btn btn-outline-secondary" title="Ver cronograma antes de solicitar">
+                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                    <span class="visually-hidden">Ver detalhes de @club.Name</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+}

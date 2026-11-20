@@ -1,0 +1,80 @@
+@model ClubFormViewModel
+@{
+    ViewData["Title"] = "Editar Clube";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="mb-3">
+            <a asp-action="Details" asp-route-id="@Model.Id" class="text-decoration-none fw-semibold">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Voltar para o Clube
+            </a>
+        </div>
+
+        <div class="bc-card p-4 p-md-5">
+            <h1 class="h3 fw-bold mb-1">Editar Dados do Clube</h1>
+            <p class="text-muted-accessible mb-4">Atualize o nome, a descrição ou a visibilidade do seu clube.</p>
+
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <fieldset class="mb-4">
+                    <legend class="form-label fs-6 mb-2">Visibilidade do clube</legend>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="bc-card p-3 d-block h-100" for="editPublico">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="IsPrivate" id="editPublico"
+                                           value="false" @(!Model.IsPrivate ? "checked" : "") />
+                                    <span class="form-check-label fw-bold">
+                                        <i class="bi bi-globe2 text-primary me-1" aria-hidden="true"></i> Público
+                                    </span>
+                                </div>
+                                <p class="small text-muted-accessible mb-0 mt-1 ps-4">
+                                    Visível em "Explorar Clubes".
+                                </p>
+                            </label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="bc-card p-3 d-block h-100" for="editPrivado">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="IsPrivate" id="editPrivado"
+                                           value="true" @(Model.IsPrivate ? "checked" : "") />
+                                    <span class="form-check-label fw-bold">
+                                        <i class="bi bi-lock text-danger me-1" aria-hidden="true"></i> Privado
+                                    </span>
+                                </div>
+                                <p class="small text-muted-accessible mb-0 mt-1 ps-4">
+                                    Acesso apenas via código de convite.
+                                </p>
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button type="submit" class="btn btn-bc-primary btn-lg flex-grow-1">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Salvar Alterações
+                    </button>
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-lg">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

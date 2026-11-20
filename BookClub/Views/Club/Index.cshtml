@@ -1,0 +1,188 @@
+@model MyClubsViewModel
+@{
+    ViewData["Title"] = "Meus Clubes";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Meus Clubes</h1>
+        <p class="text-muted-accessible mb-0">Acompanhe os clubes que você criou ou dos quais participa.</p>
+    </div>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <a asp-action="Explore" class="btn btn-bc-outline">
+            <i class="bi bi-compass" aria-hidden="true"></i> Explorar Públicos
+        </a>
+        <a asp-action="Create" class="btn btn-bc-primary">
+            <i class="bi bi-plus-circle" aria-hidden="true"></i> Criar Clube
+        </a>
+    </div>
+</div>
+
+<section aria-labelledby="convite-titulo" class="bc-card p-3 p-md-4 mb-4">
+    <form asp-action="JoinByCode" method="post" class="row g-2 align-items-end">
+        <div class="col-md-8 col-lg-9">
+            <label for="inviteCodeInput" id="convite-titulo" class="form-label mb-1">
+                <i class="bi bi-key me-1" aria-hidden="true"></i> Tem um código de convite de um clube privado?
+            </label>
+            <input type="text"
+                   id="inviteCodeInput"
+                   name="inviteCode"
+                   class="form-control"
+                   placeholder="Digite o código (ex.: CL7A2K9P)"
+                   maxlength="20"
+                   data-uppercase="true"
+                   required />
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <button type="submit" class="btn btn-bc-primary w-100">
+                <i class="bi bi-door-open" aria-hidden="true"></i> Entrar com código
+            </button>
+        </div>
+    </form>
+</section>
+
+@if (Model.PendingClubs.Any())
+{
+    <section aria-labelledby="solicitacoes-enviadas-titulo" class="bc-card p-3 p-md-4 mb-4">
+        <h2 id="solicitacoes-enviadas-titulo" class="h6 fw-bold mb-3">
+            <i class="bi bi-hourglass-split text-warning me-1" aria-hidden="true"></i>
+            Solicitações aguardando aprovação (@Model.PendingClubs.Count)
+        </h2>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var pending in Model.PendingClubs)
+            {
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 p-3 rounded-3 bg-light border">
+                    <div>
+                        <a asp-action="Details" asp-route-id="@pending.Id" class="fw-bold text-dark text-decoration-none">
+                            @pending.Name
+                        </a>
+                        <div class="small text-muted-accessible">
+                            @pending.MemberCount @(pending.MemberCount == 1 ? "membro" : "membros") • Aguardando confirmação do administrador
+                        </div>
+                    </div>
+                    <form asp-action="CancelRequest" asp-route-id="@pending.Id" method="post">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-x-circle" aria-hidden="true"></i> Cancelar pedido
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@if (!Model.Clubs.Any())
+{
+    <div class="bc-card p-4 p-md-5 text-center">
+        <i class="bi bi-journals display-4 text-muted-accessible mb-3" aria-hidden="true"></i>
+        <h2 class="h4 fw-bold mb-2">Você ainda não participa de nenhum clube</h2>
+        <p class="text-muted-accessible mb-4 mx-auto" style="max-width: 480px;">
+            Crie seu próprio clube do livro em segundos para convidar amigos, ou explore os clubes públicos disponíveis na comunidade.
+        </p>
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+            <a asp-action="Create" class="btn btn-bc-primary">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i> Criar meu primeiro clube
+            </a>
+            <a asp-action="Explore" class="btn btn-bc-outline">
+                <i class="bi bi-compass" aria-hidden="true"></i> Explorar clubes públicos
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var club in Model.Clubs)
+        {
+            var coverSrc = string.IsNullOrWhiteSpace(club.CurrentBookCoverUrl)
+                ? Url.Content("~/img/default-cover.png")
+                : club.CurrentBookCoverUrl;
+
+            <div class="col-md-6 col-lg-4">
+                <article class="bc-card bc-card-hover p-4 h-100 d-flex flex-column">
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        @if (club.UserRole == ClubRole.Owner)
+                        {
+                            <span class="bc-badge bc-badge-owner">
+                                <i class="bi bi-shield-check" aria-hidden="true"></i> Administrador
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="bc-badge bc-badge-member">
+                                <i class="bi bi-person" aria-hidden="true"></i> Membro
+                            </span>
+                        }
+
+                        @if (club.IsPrivate)
+                        {
+                            <span class="bc-badge bc-badge-private">
+                                <i class="bi bi-lock" aria-hidden="true"></i> Privado
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="bc-badge bc-badge-public">
+                                <i class="bi bi-globe2" aria-hidden="true"></i> Público
+                            </span>
+                        }
+
+                        @if (club.PendingRequestsCount > 0)
+                        {
+                            <span class="bc-badge bc-badge-owner">
+                                <i class="bi bi-person-exclamation" aria-hidden="true"></i>
+                                @club.PendingRequestsCount @(club.PendingRequestsCount == 1 ? "pedido" : "pedidos")
+                            </span>
+                        }
+                    </div>
+
+                    <h2 class="h5 fw-bold mb-2">
+                        <a asp-action="Details" asp-route-id="@club.Id" class="text-decoration-none text-dark stretched-link">
+                            @club.Name
+                        </a>
+                    </h2>
+
+                    @if (!string.IsNullOrWhiteSpace(club.Description))
+                    {
+                        <p class="text-muted-accessible small mb-3">
+                            @(club.Description.Length > 120 ? club.Description[..120] + "..." : club.Description)
+                        </p>
+                    }
+
+                    <div class="mt-auto pt-3 border-top">
+                        @if (!string.IsNullOrWhiteSpace(club.CurrentBookTitle))
+                        {
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <img src="@coverSrc"
+                                     alt="Capa do livro @club.CurrentBookTitle"
+                                     class="book-cover-sm"
+                                     loading="lazy"
+                                     onerror="this.onerror=null;this.src='/img/default-cover.png';" />
+                                <div class="min-w-0">
+                                    <div class="small text-success fw-semibold">Lendo agora</div>
+                                    <div class="fw-semibold text-truncate" title="@club.CurrentBookTitle">@club.CurrentBookTitle</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="small text-muted-accessible mb-2">
+                                <i class="bi bi-book me-1" aria-hidden="true"></i> Nenhuma leitura atual definida
+                            </div>
+                        }
+
+                        <div class="d-flex justify-content-between align-items-center small text-muted-accessible">
+                            <span>
+                                <i class="bi bi-people me-1" aria-hidden="true"></i>
+                                @club.MemberCount @(club.MemberCount == 1 ? "membro" : "membros")
+                            </span>
+                            <span class="fw-semibold text-primary">
+                                Abrir clube <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+}
